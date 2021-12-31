@@ -14,7 +14,7 @@
 #include <WiFiEspServer.h>
 #include <WiFiEspClient.h> //Libraries for the ESP8266 WiFi module
 //#include <PubSubClient.h> //Library for publish/subscripe messaging using MQTT
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h> //Library to use digital pins as i/o
 
 
 PulseSensorPlayground pulseSensor;  //Creates an instance of the PulseSensorPlayground object called "pulseSensor"
@@ -44,8 +44,6 @@ void loop() {
   status = WiFi.status();
   if ( status != WL_CONNECTED) {
     while ( status != WL_CONNECTED) {
-      Serial.print("Attempting to connect to WPA SSID: ");
-      Serial.println(WIFI_AP);
       // Connect to WPA/WPA2 network
       status = WiFi.begin(WIFI_AP, WIFI_PASSWORD);
       delay(500);
@@ -61,7 +59,6 @@ void loop() {
     tempandbpm();
     lastSend = millis();
   }
-
   thingsBoard.loop();
 }
 
@@ -71,16 +68,16 @@ void tempandbpm() {
   int myBPM = pulseSensor.getBeatsPerMinute();  // Calls function on our pulseSensor object that returns BPM as an int.
   
   tempSensor.requestTemperatures();
-  int myTEMP = tempSensor.getTempCByIndex(0); // Calls function on ouR tempSensor object that returns temp as an int.
+  int myTEMP = tempSensor.getTempCByIndex(0); // Calls function on our tempSensor object that returns temp as an int.
  
-  //Serial.print("BPM: ");
-  Serial.println(myBPM);
-  //Serial.print(" || Temp: ");
-  Serial.println(myTEMP);
-  //Serial.print("\n");
+  Serial.print("BPM: ");
+  Serial.print(myBPM);
+  Serial.print(" || Temp: ");
+  Serial.print(myTEMP);
+  Serial.print("\n");
 
-  thingsBoard.sendTelemetryFloat("Temperature", myTEMP);
-  thingsBoard.sendTelemetryFloat("BPM", myBPM);
+  thingsBoard.sendTelemetryFloat("Temperature", myTEMP); //Pass temp data to MQTT broker
+  thingsBoard.sendTelemetryFloat("BPM", myBPM); // //Pass pulse data to MQTT broker
  }
 
  void InitWiFi()
